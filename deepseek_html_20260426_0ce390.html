@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Шахматы со скинами</title>
+    
+    <!-- Стили доски -->
+    <link rel="stylesheet" href="css/chessboard-1.0.0.css">
+    
+    <!-- Немного своего стиля -->
+    <style>
+        body {
+            background: #1a1a2e;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 30px;
+            font-family: Arial, sans-serif;
+        }
+        #board {
+            width: 400px;
+        }
+        .status {
+            color: white;
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        .skin-info {
+            color: #aaa;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="board"></div>
+    <div class="status" id="status">Ход белых</div>
+    <div class="skin-info" id="skin-info">Скин дня: классический</div>
+
+    <!-- jQuery (нужен для chessboard.js) -->
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <!-- Логика шахмат -->
+    <script src="js/chess.js"></script>
+    <!-- Доска -->
+    <script src="js/chessboard-1.0.0.js"></script>
+    
+    <script>
+        // Создаём игру
+        var game = new Chess();
+        
+        // Функция для скина дня (пока заглушка)
+        function getSkinOfDay() {
+            var days = ['классический', 'пиксельный', 'неоновый', 'деревянный', 'минимализм', 'кошачий', 'фруктовый'];
+            var dayIndex = new Date().getDay();
+            return days[dayIndex];
+        }
+        
+        // Показываем скин дня
+        document.getElementById('skin-info').textContent = 'Скин дня: ' + getSkinOfDay();
+        
+        // Создаём доску
+        var board = Chessboard('board', {
+            position: 'start',
+            pieceTheme: 'img/{piece}.png',  // путь к вашим картинкам
+            onDrop: function(source, target) {
+                // Пробуем сделать ход
+                var move = game.move({
+                    from: source,
+                    to: target,
+                    promotion: 'q' // всегда превращаем в ферзя
+                });
+                
+                // Если ход невозможен — возвращаем фигуру
+                if (move === null) return 'snapback';
+                
+                // Обновляем статус
+                updateStatus();
+            }
+        });
+        
+        function updateStatus() {
+            var status = '';
+            
+            if (game.in_checkmate()) {
+                status = 'Мат! Победили ' + (game.turn() === 'w' ? 'чёрные' : 'белые');
+            } else if (game.in_draw()) {
+                status = 'Ничья!';
+            } else {
+                status = 'Ход ' + (game.turn() === 'w' ? 'белых' : 'чёрных');
+                
+                if (game.in_check()) {
+                    status += ' (шах!)';
+                }
+            }
+            
+            document.getElementById('status').textContent = status;
+        }
+    </script>
+</body>
+</html>
